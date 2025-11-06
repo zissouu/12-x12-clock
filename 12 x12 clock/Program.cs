@@ -27,25 +27,43 @@ class SmoothAnalogClock
             int hour12 = now.Hour % 12;
             if (hour12 == 0) hour12 = 12;
 
-            // Check if alarm is active
+            // Check if alarm should trigger
             bool alarmActive = (hour12 == alarmHour && now.Minute == alarmMinute && currentAmPm == amPm);
 
-            DrawSmoothClock(hour12, now.Minute, now.Second, alarmActive);
-
-            Console.WriteLine($"\nCurrent Time: {hour12:D2}:{now.Minute:D2}:{now.Second:D2} {currentAmPm}");
-            Console.WriteLine($"Alarm set for {alarmHour:D2}:{alarmMinute:D2} {amPm}");
-
-            // Beep and flash effect
             if (alarmActive)
             {
-                Console.Beep();
-                Thread.Sleep(500); // short pause to emphasize flashing
+                FlashAlarm(hour12, now.Minute, now.Second);
             }
             else
             {
+                DrawSmoothClock(hour12, now.Minute, now.Second, false);
+                Console.WriteLine($"\nCurrent Time: {hour12:D2}:{now.Minute:D2}:{now.Second:D2} {currentAmPm}");
+                Console.WriteLine($"Alarm set for {alarmHour:D2}:{alarmMinute:D2} {amPm}");
                 Thread.Sleep(1000);
             }
         }
+    }
+
+    static void FlashAlarm(int hour, int minute, int second)
+    {
+        ConsoleKeyInfo keyInfo;
+        bool flashOn = true;
+
+        while (!Console.KeyAvailable) // Continue flashing until a key is pressed
+        {
+            Console.Clear();
+            DateTime now = DateTime.Now;
+            DrawSmoothClock(hour, minute, second, flashOn);
+            Console.WriteLine("\n*** ALARM! Press any key to stop ***");
+
+            Console.Beep(); // beep with each flash
+            flashOn = !flashOn; // toggle flash
+
+            Thread.Sleep(500); // flash interval
+        }
+
+        // Consume the key press to stop alarm
+        keyInfo = Console.ReadKey(true);
     }
 
     static void DrawSmoothClock(int hour, int minute, int second, bool flashHands)
@@ -82,7 +100,7 @@ class SmoothAnalogClock
         PlotHand(handGrid, centerX, centerY, minuteAngle, 5, 'M');
         PlotHand(handGrid, centerX, centerY, secondAngle, 5, 'S');
 
-        // Print the grid with colored hands if alarm is active
+        // Print the grid with optional flash colors
         for (int r = 0; r < size; r++)
         {
             for (int c = 0; c < size; c++)
