@@ -27,7 +27,7 @@ class SmoothAnalogClock
             int hour12 = now.Hour % 12;
             if (hour12 == 0) hour12 = 12;
 
-            // Check if alarm should flash
+            // Check if alarm is active
             bool alarmActive = (hour12 == alarmHour && now.Minute == alarmMinute && currentAmPm == amPm);
 
             DrawSmoothClock(hour12, now.Minute, now.Second, alarmActive);
@@ -35,11 +35,11 @@ class SmoothAnalogClock
             Console.WriteLine($"\nCurrent Time: {hour12:D2}:{now.Minute:D2}:{now.Second:D2} {currentAmPm}");
             Console.WriteLine($"Alarm set for {alarmHour:D2}:{alarmMinute:D2} {amPm}");
 
-            // Trigger beep if alarm active
+            // Beep and flash effect
             if (alarmActive)
             {
                 Console.Beep();
-                Thread.Sleep(500); // brief pause for flash effect
+                Thread.Sleep(500); // short pause to emphasize flashing
             }
             else
             {
@@ -48,20 +48,20 @@ class SmoothAnalogClock
         }
     }
 
-    static void DrawSmoothClock(int hour, int minute, int second, bool flash)
+    static void DrawSmoothClock(int hour, int minute, int second, bool flashHands)
     {
         int size = 12;
         string[,] grid = new string[size, size];
 
-        // Fill grid with spaces or flash pattern
+        // Fill grid with empty spaces
         for (int r = 0; r < size; r++)
             for (int c = 0; c < size; c++)
-                grid[r, c] = flash ? "* " : "  "; // flashing effect
+                grid[r, c] = "  ";
 
         int centerX = size / 2;
         int centerY = size / 2;
 
-        // Place clock numbers carefully to avoid overlap
+        // Place numbers
         string[] numbers = { "12", "1 ", "2 ", "3 ", "4 ", "5 ", "6 ", "7 ", "8 ", "9 ", "10", "11" };
         (int r, int c)[] positions = {
             (0, centerX), (1, size - 2), (3, size - 1), (centerY, size - 1),
@@ -69,29 +69,47 @@ class SmoothAnalogClock
             (size - 2, 1), (size - 3, 0), (centerY, 0), (3, 0), (1, 1)
         };
         for (int i = 0; i < numbers.Length; i++)
-        {
             grid[positions[i].r, positions[i].c] = numbers[i];
-        }
 
         // Convert hour, minute, second to angles
-        double hourAngle = ((hour % 12) + minute / 60.0 + second / 3600.0) * 30; // degrees
+        double hourAngle = ((hour % 12) + minute / 60.0 + second / 3600.0) * 30;
         double minuteAngle = (minute + second / 60.0) * 6;
         double secondAngle = second * 6;
 
-        // Draw hands only if not flashing
-        if (!flash)
-        {
-            PlotHand(grid, centerX, centerY, hourAngle, 4, 'H');    // hour hand
-            PlotHand(grid, centerX, centerY, minuteAngle, 5, 'M');  // minute hand
-            PlotHand(grid, centerX, centerY, secondAngle, 5, 'S');  // second hand
-        }
+        // Draw hands in the grid
+        string[,] handGrid = (string[,])grid.Clone();
+        PlotHand(handGrid, centerX, centerY, hourAngle, 4, 'H');
+        PlotHand(handGrid, centerX, centerY, minuteAngle, 5, 'M');
+        PlotHand(handGrid, centerX, centerY, secondAngle, 5, 'S');
 
-        // Print grid
+        // Print the grid with colored hands if alarm is active
         for (int r = 0; r < size; r++)
         {
             for (int c = 0; c < size; c++)
             {
-                Console.Write(grid[r, c]);
+                string cell = handGrid[r, c];
+                if (flashHands && cell.Trim() == "H")
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.Write("H ");
+                    Console.ResetColor();
+                }
+                else if (flashHands && cell.Trim() == "M")
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.Write("M ");
+                    Console.ResetColor();
+                }
+                else if (flashHands && cell.Trim() == "S")
+                {
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.Write("S ");
+                    Console.ResetColor();
+                }
+                else
+                {
+                    Console.Write(cell);
+                }
             }
             Console.WriteLine();
         }
@@ -99,16 +117,14 @@ class SmoothAnalogClock
 
     static void PlotHand(string[,] grid, int cx, int cy, double angleDeg, int length, char symbol)
     {
-        double angleRad = (Math.PI / 180) * (angleDeg - 90); // 0 degrees is up
+        double angleRad = (Math.PI / 180) * (angleDeg - 90);
         for (int i = 1; i <= length; i++)
         {
             int x = cx + (int)Math.Round(i * Math.Cos(angleRad));
             int y = cy + (int)Math.Round(i * Math.Sin(angleRad));
-
-            // Stay inside grid and don't overwrite numbers
             if (x >= 0 && x < grid.GetLength(1) && y >= 0 && y < grid.GetLength(0))
             {
-                if (grid[y, x].Trim() == "") // only draw if cell is empty
+                if (grid[y, x].Trim() == "")
                     grid[y, x] = symbol + " ";
             }
         }
