@@ -1,0 +1,14 @@
+/Users/szyartojeffrey/Desktop/12 x12 clock/obj/Debug/net9.0/12 x12 clock.GeneratedMSBuildEditorConfig.editorconfig
+/Users/szyartojeffrey/Desktop/12 x12 clock/obj/Debug/net9.0/12 x12 clock.AssemblyInfoInputs.cache
+/Users/szyartojeffrey/Desktop/12 x12 clock/obj/Debug/net9.0/12 x12 clock.AssemblyInfo.cs
+/Users/szyartojeffrey/Desktop/12 x12 clock/obj/Debug/net9.0/12 x12 clock.csproj.CoreCompileInputs.cache
+/Users/szyartojeffrey/Desktop/12 x12 clock/bin/Debug/net9.0/12 x12 clock
+/Users/szyartojeffrey/Desktop/12 x12 clock/bin/Debug/net9.0/12 x12 clock.deps.json
+/Users/szyartojeffrey/Desktop/12 x12 clock/bin/Debug/net9.0/12 x12 clock.runtimeconfig.json
+/Users/szyartojeffrey/Desktop/12 x12 clock/bin/Debug/net9.0/12 x12 clock.dll
+/Users/szyartojeffrey/Desktop/12 x12 clock/bin/Debug/net9.0/12 x12 clock.pdb
+/Users/szyartojeffrey/Desktop/12 x12 clock/obj/Debug/net9.0/12 x12 clock.dll
+/Users/szyartojeffrey/Desktop/12 x12 clock/obj/Debug/net9.0/refint/12 x12 clock.dll
+/Users/szyartojeffrey/Desktop/12 x12 clock/obj/Debug/net9.0/12 x12 clock.pdb
+/Users/szyartojeffrey/Desktop/12 x12 clock/obj/Debug/net9.0/12 x12 clock.genruntimeconfig.cache
+/Users/szyartojeffrey/Desktop/12 x12 clock/obj/Debug/net9.0/ref/12 x12 clock.dll
