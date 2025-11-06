@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Threading;
 
-class SmoothAnalogClock
+class SmoothAnalogClock24
 {
     static void Main()
     {
-        Console.WriteLine("=== 12x12 Smooth Analog Alarm Clock ===");
+        Console.WriteLine("=== 24x24 Smooth Analog Alarm Clock ===");
 
         // Get alarm input
         Console.Write("Set alarm hour (1-12): ");
@@ -56,35 +56,33 @@ class SmoothAnalogClock
             DrawSmoothClock(hour, minute, second, flashOn);
             Console.WriteLine("\n*** ALARM! Press any key to stop ***");
 
-            Console.Beep(); // beep with each flash
+            Console.Beep();
             flashOn = !flashOn; // toggle flash
-
-            Thread.Sleep(500); // flash interval
+            Thread.Sleep(500);
         }
 
-        // Consume the key press to stop alarm
         keyInfo = Console.ReadKey(true);
     }
 
     static void DrawSmoothClock(int hour, int minute, int second, bool flashHands)
     {
-        int size = 12;
+        int size = 24;
         string[,] grid = new string[size, size];
 
         // Fill grid with empty spaces
         for (int r = 0; r < size; r++)
             for (int c = 0; c < size; c++)
-                grid[r, c] = "  ";
+                grid[r, c] = "  "; // 2-character cells for alignment
 
         int centerX = size / 2;
         int centerY = size / 2;
 
-        // Place numbers
+        // Place numbers on the 24x24 grid
         string[] numbers = { "12", "1 ", "2 ", "3 ", "4 ", "5 ", "6 ", "7 ", "8 ", "9 ", "10", "11" };
         (int r, int c)[] positions = {
-            (0, centerX), (1, size - 2), (3, size - 1), (centerY, size - 1),
-            (size - 3, size - 1), (size - 2, size - 2), (size - 1, centerX),
-            (size - 2, 1), (size - 3, 0), (centerY, 0), (3, 0), (1, 1)
+            (0, centerX), (2, size - 3), (5, size - 1), (centerY, size - 1),
+            (size - 5, size - 1), (size - 3, size - 3), (size - 1, centerX),
+            (size - 3, 2), (size - 5, 0), (centerY, 0), (5,0), (2,2)
         };
         for (int i = 0; i < numbers.Length; i++)
             grid[positions[i].r, positions[i].c] = numbers[i];
@@ -96,9 +94,9 @@ class SmoothAnalogClock
 
         // Draw hands in the grid
         string[,] handGrid = (string[,])grid.Clone();
-        PlotHand(handGrid, centerX, centerY, hourAngle, 4, 'H');
-        PlotHand(handGrid, centerX, centerY, minuteAngle, 5, 'M');
-        PlotHand(handGrid, centerX, centerY, secondAngle, 5, 'S');
+        PlotHand(handGrid, centerX, centerY, hourAngle, 8, 'H');   // hour hand longer for bigger grid
+        PlotHand(handGrid, centerX, centerY, minuteAngle, 10, 'M'); // minute hand
+        PlotHand(handGrid, centerX, centerY, secondAngle, 10, 'S'); // second hand
 
         // Print the grid with optional flash colors
         for (int r = 0; r < size; r++)
