@@ -27,66 +27,71 @@ class SmoothAnalogClock
             int hour12 = now.Hour % 12;
             if (hour12 == 0) hour12 = 12;
 
-            DrawSmoothClock(hour12, now.Minute, now.Second);
+            // Check if alarm should flash
+            bool alarmActive = (hour12 == alarmHour && now.Minute == alarmMinute && currentAmPm == amPm);
+
+            DrawSmoothClock(hour12, now.Minute, now.Second, alarmActive);
 
             Console.WriteLine($"\nCurrent Time: {hour12:D2}:{now.Minute:D2}:{now.Second:D2} {currentAmPm}");
             Console.WriteLine($"Alarm set for {alarmHour:D2}:{alarmMinute:D2} {amPm}");
 
-            // Alarm check
-            if (hour12 == alarmHour && now.Minute == alarmMinute && currentAmPm == amPm)
+            // Trigger beep if alarm active
+            if (alarmActive)
             {
-                Console.WriteLine("\n*** ALARM! ***");
                 Console.Beep();
-                Thread.Sleep(60000); // wait a minute to avoid repeating
+                Thread.Sleep(500); // brief pause for flash effect
             }
-
-            Thread.Sleep(1000);
+            else
+            {
+                Thread.Sleep(1000);
+            }
         }
     }
 
-    static void DrawSmoothClock(int hour, int minute, int second)
+    static void DrawSmoothClock(int hour, int minute, int second, bool flash)
     {
         int size = 12;
         string[,] grid = new string[size, size];
 
-        // Fill grid with spaces
+        // Fill grid with spaces or flash pattern
         for (int r = 0; r < size; r++)
             for (int c = 0; c < size; c++)
-                grid[r, c] = " ";
+                grid[r, c] = flash ? "* " : "  "; // flashing effect
 
         int centerX = size / 2;
         int centerY = size / 2;
 
-        // Place clock numbers (strings)
-        grid[0, centerX] = "12";
-        grid[1, size - 2] = "1";
-        grid[3, size - 1] = "2";
-        grid[centerY, size - 1] = "3";
-        grid[size - 3, size - 1] = "4";
-        grid[size - 2, size - 2] = "5";
-        grid[size - 1, centerX] = "6";
-        grid[size - 2, 1] = "7";
-        grid[size - 3, 0] = "8";
-        grid[centerY, 0] = "9";
-        grid[3, 0] = "10";
-        grid[1, 1] = "11";
+        // Place clock numbers carefully to avoid overlap
+        string[] numbers = { "12", "1 ", "2 ", "3 ", "4 ", "5 ", "6 ", "7 ", "8 ", "9 ", "10", "11" };
+        (int r, int c)[] positions = {
+            (0, centerX), (1, size - 2), (3, size - 1), (centerY, size - 1),
+            (size - 3, size - 1), (size - 2, size - 2), (size - 1, centerX),
+            (size - 2, 1), (size - 3, 0), (centerY, 0), (3, 0), (1, 1)
+        };
+        for (int i = 0; i < numbers.Length; i++)
+        {
+            grid[positions[i].r, positions[i].c] = numbers[i];
+        }
 
         // Convert hour, minute, second to angles
         double hourAngle = ((hour % 12) + minute / 60.0 + second / 3600.0) * 30; // degrees
         double minuteAngle = (minute + second / 60.0) * 6;
         double secondAngle = second * 6;
 
-        // Draw hands
-        PlotHand(grid, centerX, centerY, hourAngle, 4, 'H');    // hour hand
-        PlotHand(grid, centerX, centerY, minuteAngle, 5, 'M');  // minute hand
-        PlotHand(grid, centerX, centerY, secondAngle, 5, 'S');  // second hand
+        // Draw hands only if not flashing
+        if (!flash)
+        {
+            PlotHand(grid, centerX, centerY, hourAngle, 4, 'H');    // hour hand
+            PlotHand(grid, centerX, centerY, minuteAngle, 5, 'M');  // minute hand
+            PlotHand(grid, centerX, centerY, secondAngle, 5, 'S');  // second hand
+        }
 
         // Print grid
         for (int r = 0; r < size; r++)
         {
             for (int c = 0; c < size; c++)
             {
-                Console.Write(grid[r, c] + " ");
+                Console.Write(grid[r, c]);
             }
             Console.WriteLine();
         }
@@ -94,15 +99,18 @@ class SmoothAnalogClock
 
     static void PlotHand(string[,] grid, int cx, int cy, double angleDeg, int length, char symbol)
     {
-        double angleRad = (Math.PI / 180) * (angleDeg - 90); // Adjust so 0 degrees is up
+        double angleRad = (Math.PI / 180) * (angleDeg - 90); // 0 degrees is up
         for (int i = 1; i <= length; i++)
         {
             int x = cx + (int)Math.Round(i * Math.Cos(angleRad));
             int y = cy + (int)Math.Round(i * Math.Sin(angleRad));
 
-            // Stay inside the grid
+            // Stay inside grid and don't overwrite numbers
             if (x >= 0 && x < grid.GetLength(1) && y >= 0 && y < grid.GetLength(0))
-                grid[y, x] = symbol.ToString();
+            {
+                if (grid[y, x].Trim() == "") // only draw if cell is empty
+                    grid[y, x] = symbol + " ";
+            }
         }
     }
 }
